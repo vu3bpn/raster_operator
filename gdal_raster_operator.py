@@ -43,7 +43,8 @@ if __name__ == '__main__':
     b2,f2 = get_raster_band('BAND3.tif')
     b3,f3 = get_raster_band('BAND4.tif')
     
-    b4 = operator(operation1,b1,b2,b3)    
+    #b4 = operator(operation1,b1,b2,b3)
+    b4 = (b1+b2)/b3
     write_raster_band('BAND_out.tif',b4,f1.GetGeoTransform(),f1.GetProjectionRef())
     
     
