@@ -12,31 +12,30 @@ import numpy as np
 import itertools as it
 import struct
 
-in_fn1 = 'BAND2.tif'
-in_fn2 = 'BAND3.tif'
-out_fn = 'out_band.tif'
+in_fn1 = 'BAND2.tif'    # input File1
+in_fn2 = 'BAND3.tif'    # input File2
+out_fn = 'out_band.tif' # Output File
 
 
-    
+ 
+
     
 def operate_blocks(b1,b2,out_b1,operation):
-    [nx,ny] = b1.GetBlockSize()
+    ''' Reads each Band block by block map operation in the block and write back the block '''
+    [nx,ny] = b1.GetBlockSize()     # Block size 
     for blk_idx_x,blk_idx_y in it.product(range(b1.XSize/nx),range(b1.YSize/ny)):
         if b1.DataType == GDT_UInt16:
             blk1 = b1.ReadBlock(blk_idx_x,blk_idx_y)
             blk2 = b2.ReadBlock(blk_idx_x,blk_idx_y)
-            dat1 = np.array(struct.unpack('H'*nx*ny,blk1))
-            dat2 = np.array(struct.unpack('H'*nx*ny,blk2))
-            #dat1.shape = [nx,ny]
-            #dat2.shape = [nx,ny]
-            #out = (dat2/2 + dat1/2)
-            out = map(operation,dat1,dat2)
-            packed_data = out.astype(np.uint16).tostring()
-            out_b1.WriteRaster(blk_idx_x*nx,blk_idx_y*ny,nx,ny,packed_data)
-            out_b1.FlushCache()
+            dat1 = np.array(struct.unpack('H'*nx*ny,blk1)) ## unpack to Uint16
+            dat2 = np.array(struct.unpack('H'*nx*ny,blk2)) ## unpack to Uint16
+            out = map(operation,dat1,dat2)                 ## Map blocks to the operator
+            packed_data = out.astype(np.uint16).tostring() ## Pack to Uint16
+            out_b1.WriteRaster(blk_idx_x*nx,blk_idx_y*ny,nx,ny,packed_data) # Write The block
+            out_b1.FlushCache() # write the output Block
 
 def operation(d1,d2):
-    return d1/2+d2/2
+    return d1/2+d2/2 # simple mean 
 
 if __name__ == '__main__':
     f1 = gdal.Open(in_fn1,GA_ReadOnly)
